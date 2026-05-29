@@ -3,7 +3,6 @@
 A data-driven analysis of South Australian climate data to identify the most suitable location for a large-scale solar farm.
 
 **Authors:** Cayden Mecham, Janay Will, Jingwen Liu, Royce Butler | Centaur Group  
-**Institution:** Adelaide University — Engineering Data Analytics
 
 ---
 
@@ -23,13 +22,13 @@ A data-driven analysis of South Australian climate data to identify the most sui
 
 ## Overview
 
-South Australia has seen a rapid uptake in renewable energy, driven by government policy and rising demand from electric vehicle adoption. With high solar intensity and low population density, the region is well suited to solar farm development. This report evaluates candidate sites across four climate variables to recommend the best location for a new solar farm.
+South Australia has seen a rapid uptake in renewable energy, which is driven by government policy and rising demand from electric vehicle adoption.  The region is well suited to solar farm development due to high solar intensity and low population density. This report evaluates potential places across four climate variables to recommend the best location for a new solar farm.
 
 ---
 
 ## Objective
 
-To determine the most suitable location for a solar farm in South Australia by analyzing historical climate data — specifically solar exposure, rainfall, rainy-day frequency, and temperature — across BOM weather stations spanning a 30-year period (1995–2025).
+To determine the most suitable location for a solar farm in South Australia by analysing historical climate data, specifically solar exposure, rainfall, rainy-day frequency, and temperature from BOM weather stations spanning a 30-year period (1995–2025).
 
 ---
 
