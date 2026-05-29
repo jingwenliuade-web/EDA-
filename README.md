@@ -40,11 +40,10 @@ Climate data was sourced from the Australian Bureau of Meteorology's Climate Dat
 |---|---|
 | Solar exposure | Higher values mean more power generation potential |
 | Location | Proximity to electrical infrastructure is critical |
-| Rainfall | Periodic rain helps wash dust off panels; too much rain reduces sun exposure |
+| Rainfall | Periodic rain helps wash dust off panels and too much rain reduces sun exposure |
 | Days of rain | Fewer rainy days with higher rainfall per event is the ideal scenario |
-| Temperature | Panel efficiency drops 0.2–0.5% for every degree over 25°C |
+| Temperature | Temperature is considered for optimum efficiency |
 
-Stations were plotted geographically — the final selected station is marked with a green star on a BOM station map.
 
 ---
 
@@ -56,19 +55,11 @@ A multi-stage analytical pipeline was used:
 
 | Technique | Purpose |
 |---|---|
-| **Linear Regression** | Model the temporal trend of annual standard deviation and interquartile range of daily solar exposure (1995–2025) |
-| **Kruskal-Wallis Test** | Non-parametric comparison of solar exposure distributions across stations (data was non-normal per QQ-plot analysis) |
+| **Linear Regression** | Model the temporal trend of annual standard deviation and interquartile range of daily solar exposure |
+| **Kruskal-Wallis Test** | Non-parametric comparison of solar exposure distributions across stations |
 | **Scatterplot Analysis** | Bivariate comparison of climate variables (rainfall vs. solar exposure, temperature vs. rainfall, etc.) |
 | **Boxplot Analysis** | Single quantitative variable comparison across stations |
 
-### Hypothesis Test
-
-For solar exposure distribution across stations:
-
-- **H₀:** All stations have the same solar data distribution
-- **Hₐ:** At least one station has a different distribution
-
-The Kruskal-Wallis test returned a p-value well below 1%, strongly rejecting the null hypothesis. Follow-up pairwise comparisons showed 13 out of 78 station pairs (16.7%) had statistically similar distributions, which was deemed acceptable.
 
 ---
 
@@ -76,17 +67,15 @@ The Kruskal-Wallis test returned a p-value well below 1%, strongly rejecting the
 
 ### Trend Analysis
 
-Linear regression on 30-year data revealed:
-
-- **Annual standard deviation** of daily solar exposure showed a significant negative trend — variability declined consistently over the study period.
-- **Annual interquartile range** also decreased significantly, though with a weaker relationship.
+- Annual standard deviation of daily solar exposure showed a significant negative trend which exhibited variability declined consistently.
+- Annual interquartile range also decreased significantly.
 - Overall, South Australia's solar climate became more stable between 1995 and 2025.
 
 ### Variable Analysis
 
-- **Rainfall and rainy days:** Naracoorte and Padthaway had much higher rainfall and were excluded. Arkaroola was ruled out as a wilderness protection area. Ernabella and Tarcoola were less favourable due to more rainy days. Mulka had too few rainy days.
-- **Solar exposure:** Lower exposure was observed for south-eastern stations (Naracoorte, Padthaway). All other stations clustered around 20 MJ/m².
-- **Temperature:** All median values fell within the 20–30°C range. Stations with temperatures outside the optimum window were excluded during bivariate analysis.
+- Rainfall and rainy days: Naracoorte and Padthaway had much higher rainfall and were excluded. Arkaroola was ruled out as a wilderness protection area. Ernabella and Tarcoola were less favourable due to more rainy days. Mulka had too few rainy days.
+- Solar exposure: Lower exposure was observed for south-eastern stations (Naracoorte, Padthaway). All other stations clustered around 20 MJ/m².
+- Temperature: All median values fell within the 20–30°C range. Stations with temperatures outside the optimum window were excluded during bivariate analysis.
 
 ---
 
