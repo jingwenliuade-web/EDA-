@@ -1,0 +1,463 @@
+---
+title: "Solarpanel Location Data Analyser"
+subtitle: "Data Analytics Assignment"
+author: "Cayden Mecham | a3222345"
+format: pdf
+editor: visual
+number-sections: true
+tbl-cap-location: bottom
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Running Code
+
+**Library Installing**
+
+Also disables all warning messages
+
+```{r}
+library(tidyverse)
+library(cowplot)
+library(ggplot2)
+library(ggrepel)
+
+options(warn = -1)
+```
+
+**Dataset Installing**
+
+This code block downloads all the required CSV files from the project directory. For this to work ensure all CSV files are in same folder location as the R file.
+
+This code also;
+
+-   Bounds the data to only include data that is \>= 1995.
+
+-   Create vectors of yearly rainfall and no.days of rain per year
+
+-   Ensures all rain, solar and temperature vectors are off the same length so they can be concatenated in later sections. This is done by adding null (NA) cells to the vectors to ensure they all the same lengths. For the rain variables, this is done either first or last depending of what years are missing.
+
+```{r}
+
+
+## Ernabella (replacement for Fregon) ##
+
+Ernabella_Solar <- read.csv("Ernabella Solar Exposure - IDCJAC0016_016097_1800_Data.csv")
+Ernabella_Rain <- read.csv("Ernabella Rainfall - IDCJAC0009_016097_1800_Data.csv")
+Ernabella_Temp <- read.csv("Ernabella Max Temp - IDCJAC0010_016097_1800_Data.csv")
+
+Ernabella_Rain <- filter(Ernabella_Rain,Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+
+Ernabella_Solar <- filter(Ernabella_Solar,Year>1994)
+Ernabella_Temp <- filter(Ernabella_Temp,Year>1994)
+
+Ernabella_Solar_data <- c(Ernabella_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Ernabella_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Ernabella_Temp_data <- c(Ernabella_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Ernabella_Temp$Maximum.temperature..Degree.C.)))
+
+null_rain <- data.frame(Year=NA,Rainfall=NA,Days_Rain=NA)
+Ernabella_Rain <- rbind(null_rain,null_rain,Ernabella_Rain)
+
+## Marla (Dallirina replacement)  ##
+
+Marla_Solar <- read.csv("Marla Solar Exposure - IDCJAC0016_016085_1800_Data.csv")
+Marla_Rain <- read.csv("Marla Rainfall - IDCJAC0009_016085_1800_Data.csv")
+Marla_Temp <- read.csv("Marla Max Temp - IDCJAC0010_016085_1800_Data.csv")
+
+Marla_Rain <- filter(Marla_Rain,Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Marla_Solar <- filter(Marla_Solar,Year>1994)
+Marla_Temp <- filter(Marla_Temp,Year>1994)
+
+Marla_Solar_data <- c(Marla_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Marla_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Marla_Temp_data <- c(Marla_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Marla_Temp$Maximum.temperature..Degree.C.)))
+
+Marla_Rain <- rbind(Marla_Rain, null_rain, null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain)
+
+## Moomba (Mungerine Replacement)
+
+Moomba_Solar <- read.csv("Moomba Solar Exposure - IDCJAC0016_017123_1800_Data.csv")
+Moomba_Rain <- read.csv("Moomba Rainfall - IDCJAC0009_017123_1800_Data.csv")
+Moomba_Temp <- read.csv("Moomba Max Temp - IDCJAC0010_017123_1800_Data.csv")
+
+Moomba_Rain <- filter(Moomba_Rain,Year>1994)%>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Moomba_Solar <- filter(Moomba_Solar,Year>1994)
+Moomba_Temp <- filter(Moomba_Temp,Year>1994)
+
+Moomba_Solar_data <- c(Moomba_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Moomba_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Moomba_Temp_data <- c(Moomba_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Moomba_Temp$Maximum.temperature..Degree.C.)))
+
+## Oodanata (Nilpinna Replacment)
+
+Oodanata_Solar <- read.csv("Oodanata Solar Exposure - IDCJAC0016_017043_1800_Data.csv")
+Oodanata_Rain <- read.csv("Oodanata Rainfall - IDCJAC0009_017043_1800_Data.csv")
+Oodanata_Temp <- read.csv("Oodanata Max Temp - IDCJAC0010_017043_1800_Data.csv")
+
+Oodanata_Rain <- filter(Oodanata_Rain,Year>1994)%>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Oodanata_Solar <- filter(Oodanata_Solar,Year>1994)
+Oodanata_Temp <- filter(Oodanata_Temp,Year>1994)
+
+Oodanata_Solar_data <- c(Oodanata_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Oodanata_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Oodanata_Temp_data <- c(Oodanata_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Oodanata_Temp$Maximum.temperature..Degree.C.)))
+
+## Arkaroola (Wymbanna Replacement) 
+
+Arkaroola_Solar <- read.csv("Arkaroola Solar Exposure - IDCJAC0016_017099_1800_Data.csv")
+Arkaroola_Rain <- read.csv("Arkaroola Rainfall - IDCJAC0009_017099_1800_Data.csv")
+Arkaroola_Temp <- read.csv("Arkaroola Max Temp - IDCJAC0010_017099_1800_Data.csv")
+
+Arkaroola_Rain <- filter(Arkaroola_Rain,Year>1994)%>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Arkaroola_Solar <- filter(Arkaroola_Solar,Year>1994)
+Arkaroola_Temp <- filter(Arkaroola_Temp,Year>1994)
+
+Arkaroola_Solar_data <- c(Arkaroola_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Arkaroola_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Arkaroola_Temp_data <- c(Arkaroola_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Arkaroola_Temp$Maximum.temperature..Degree.C.)))
+
+## Tarcoola (Wirraminna Replacement)
+
+Tarcoola_Solar <- read.csv("Tarcoola Solar Exposure - IDCJAC0016_016098_1800_Data.csv")
+Tarcoola_Rain <- read.csv("Tarcoola Rainfall - IDCJAC0009_016098_1800_Data.csv")
+Tarcoola_Temp <- read.csv("Tarcoola Max Temp - IDCJAC0010_016098_1800_Data.csv")
+
+Tarcoola_Rain <- filter(Tarcoola_Rain,Year>1994)%>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Tarcoola_Solar <- filter(Tarcoola_Solar,Year>1994)
+Tarcoola_Temp <- filter(Tarcoola_Temp,Year>1994)
+
+Tarcoola_Solar_data <- c(Tarcoola_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Tarcoola_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Tarcoola_Temp_data <- c(Tarcoola_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Tarcoola_Temp$Maximum.temperature..Degree.C.)))
+
+Tarcoola_Rain <- rbind(null_rain,null_rain,Tarcoola_Rain)
+
+## Pirie (Hallet Replacement) 
+
+Pirie_Solar <- read.csv("Pirie Solar Exposure - IDCJAC0016_021043_1800_Data.csv")
+Pirie_Rain <- read.csv("Pirie Rainfall - IDCJAC0009_021043_1800_Data.csv")
+Pirie_Temp <- read.csv("Pirie Max Temp - IDCJAC0010_021043_1800_Data.csv")
+
+Pirie_Rain <- filter(Pirie_Rain,Year>1994)%>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Pirie_Solar <- filter(Pirie_Solar,Year>1994)
+Pirie_Temp <- filter(Pirie_Temp,Year>1994)
+
+Pirie_Solar_data <- c(Pirie_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Pirie_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Pirie_Temp_data <- c(Pirie_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Pirie_Temp$Maximum.temperature..Degree.C.)))
+
+Pirie_Rain <- rbind(Pirie_Rain, null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain)
+## Naracoorte (Coonawarra Replacement)
+
+Naracoorte_Solar <- read.csv("Naracoorte Solar Exposure - IDCJAC0016_026099_1800_Data.csv")
+Naracoorte_Rain <- read.csv("Naracoorte Rainfall - IDCJAC0009_026099_1800_Data.csv")
+Naracoorte_Temp <- read.csv("Naracoorte Max Temp - IDCJAC0010_026099_1800_Data.csv")
+
+Naracoorte_Rain <- filter(Naracoorte_Rain,Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Naracoorte_Solar <- filter(Naracoorte_Solar,Year>1994)
+Naracoorte_Temp <- filter(Naracoorte_Temp,Year>1994)
+
+Naracoorte_Solar_data <- c(Naracoorte_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Naracoorte_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Naracoorte_Temp_data <- c(Naracoorte_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Naracoorte_Temp$Maximum.temperature..Degree.C.)))
+
+Naracoorte_Rain <- rbind(Naracoorte_Rain,null_rain,null_rain,null_rain)
+
+# Ceduna
+
+Ceduna_Solar <- read.csv("Ceduna Solar Exposure - IDCJAC0016_018012_1800_Data.csv")
+Ceduna_Rain <- read.csv("Ceduna Rainfall - IDCJAC0009_018012_1800_Data.csv")
+Ceduna_Temp <- read.csv("Ceduna Max Temp - IDCJAC0010_018012_1800_Data.csv")
+
+Ceduna_Solar <- filter(Ceduna_Solar,Year>1994)
+Ceduna_Rain <- filter(Ceduna_Rain,Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Ceduna_Temp <- filter(Ceduna_Temp,Year>1994)
+
+Ceduna_Solar_data <- c(Ceduna_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Ceduna_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Ceduna_Temp_data <- c(Ceduna_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Ceduna_Temp$Maximum.temperature..Degree.C.)))
+
+# Roxby 
+Roxby_solar <- read.csv("Roxby Solar Exposure - IDCJAC0016_016096_1800_Data.csv")
+Roxby_rain <- read.csv("Roxby Rainfall - IDCJAC0009_016096_1800_Data.csv")
+Roxby_Temp <- read.csv("Roxby Max Temp - IDCJAC0010_016096_1800_Data.csv")
+
+Roxby_solar <- filter(Roxby_solar, Year>1994)
+Roxby_rain <- filter(Roxby_rain, Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Roxby_Temp <- filter(Roxby_Temp,Year>1994)
+
+Roxby_Solar_data <- c(Roxby_solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Roxby_solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Roxby_temp_data <- c(Roxby_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Roxby_Temp$Maximum.temperature..Degree.C.)))
+
+Roxby_rain <- rbind(Roxby_rain,null_rain,null_rain)
+
+# Padthaway
+
+Padthaway_solar <- read.csv("Padthaway Solar Exposure - IDCJAC0016_026100_1800_Data.csv")
+Padthaway_rain <- read.csv("Padthaway Rainfall - IDCJAC0009_026100_1800_Data.csv")
+Padthaway_Temp <- read.csv("Padthaway Max Temp - IDCJAC0010_026100_1800_Data.csv")
+
+Padthaway_solar <- filter(Padthaway_solar, Year>1994)
+Padthaway_rain <- filter(Padthaway_rain, Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Padthaway_Temp <- filter(Padthaway_Temp,Year>1994)
+
+Padthaway_Solar_data <- c(Padthaway_solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Padthaway_solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Padthaway_Temp_data <- c(Padthaway_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Padthaway_Temp$Maximum.temperature..Degree.C.)))
+
+Padthaway_rain <- rbind(Padthaway_rain,null_rain,null_rain,null_rain,null_rain,null_rain)
+
+# Cleve 
+
+Cleve_Solar <- read.csv("Cleve Solar Exposure - IDCJAC0016_018014_1800_Data.csv")
+Cleve_Rain <- read.csv("Cleve Rainfall - IDCJAC0009_018014_1800_Data.csv")
+Cleve_Temp <- read.csv("Cleve Max Temp - IDCJAC0010_018014_1800_Data.csv")
+
+Cleve_Solar <- filter(Cleve_Solar, Year>1994)
+Cleve_Rain <- filter(Cleve_Rain, Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+Cleve_Temp <- filter(Cleve_Temp,Year>1994)
+
+Cleve_Solar_data <- c(Cleve_Solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Cleve_Solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Cleve_Temp_data <- c(Cleve_Temp$Maximum.temperature..Degree.C., rep(NA, 11430-length(Cleve_Temp$Maximum.temperature..Degree.C.)))
+
+
+
+# Mulka 
+
+Mulka_solar <- read.csv("Mulka Solar Exposure - IDCJAC0016_017036_1800_Data.csv")
+Mulka_rain <- read.csv("Mulka Rainfall - IDCJAC0009_017036_1800_Data.csv")
+# Mulka has no temp csv
+
+Mulka_solar <- filter(Mulka_solar, Year>1994)
+Mulka_rain <- filter(Mulka_rain, Year>1994) %>%
+  group_by(Year) %>%
+  summarise(
+      Rainfall = sum(Rainfall.amount..millimetres., na.rm = TRUE),
+      Days_Rain = sum(Rainfall.amount..millimetres. > 0, na.rm = TRUE))
+
+
+Mulka_Solar_data <- c(Mulka_solar$Daily.global.solar.exposure..MJ.m.m., rep(NA, 11430-length(Mulka_solar$Daily.global.solar.exposure..MJ.m.m.)))
+
+Mulka_temp_data <- c(rep(NA, 11430))
+
+Mulka_rain <- rbind(Mulka_rain, null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain,null_rain)
+
+```
+
+**Data Concatenation**
+
+This code block joins the respective 4 variables together from each station. This also creates a vector containing all the median values for each variable for each station.
+
+```{r}
+
+Solar_Joined <- data.frame(Ernabella = Ernabella_Solar_data, Marla = Marla_Solar_data, Moomba = Moomba_Solar_data, Oodanata = Oodanata_Solar_data, Arkaroola = Arkaroola_Solar_data, Tarcoola = Tarcoola_Solar_data, Pirie = Pirie_Solar_data, Mulka = Mulka_Solar_data, Naracoorte = Naracoorte_Solar_data, Padthaway = Padthaway_Solar_data, Roxby = Roxby_Solar_data, Ceduna = Ceduna_Solar_data, Cleve = Cleve_Solar_data)
+
+Rain_Joined <- data.frame(Ernabella = Ernabella_Rain$Rainfall, Marla = Marla_Rain$Rainfall, Moomba = Moomba_Rain$Rainfall, Oodanata = Oodanata_Rain$Rainfall, Arkaroola = Arkaroola_Rain$Rainfall, Tarcoola = Tarcoola_Rain$Rainfall, Pirie = Pirie_Rain$Rainfall, Mulka = Mulka_rain$Rainfall, Naracoorte = Naracoorte_Rain$Rainfall, Padthaway = Padthaway_rain$Rainfall, Roxby = Roxby_rain$Rainfall, Ceduna = Ceduna_Rain$Rainfall, Cleve = Cleve_Rain$Rainfall)
+
+Raining_Joined <- data.frame(Ernabella = Ernabella_Rain$Days_Rain, Marla = Marla_Rain$Days_Rain, Moomba = Moomba_Rain$Days_Rain, Oodanata = Oodanata_Rain$Days_Rain, Arkaroola = Arkaroola_Rain$Days_Rain, Tarcoola = Tarcoola_Rain$Days_Rain, Pirie = Pirie_Rain$Days_Rain, Mulka = Mulka_rain$Days_Rain, Naracoorte = Naracoorte_Rain$Days_Rain, Padthaway = Padthaway_rain$Days_Rain, Roxby = Roxby_rain$Days_Rain, Ceduna = Ceduna_Rain$Days_Rain, Cleve = Cleve_Rain$Days_Rain)
+
+Temp_Joined <- data.frame(Ernabella = Ernabella_Temp_data, Marla = Marla_Temp_data, Moomba = Moomba_Temp_data, Oodanata = Oodanata_Temp_data, Arkaroola = Arkaroola_Temp_data, Tarcoola = Tarcoola_Temp_data, Pirie = Pirie_Temp_data, Mulka = Mulka_temp_data, Naracoorte = Naracoorte_Temp_data, Padthaway = Padthaway_Temp_data, Roxby = Roxby_temp_data, Ceduna = Ceduna_Temp_data, Cleve = Cleve_Temp_data)
+
+Solar_med <- apply(Solar_Joined, 2, median, na.rm = TRUE)
+Rain_med <- apply(Rain_Joined, 2, median, na.rm=TRUE)
+Temp_med <- apply(Temp_Joined, 2, median, na.rm = TRUE)
+Raining_med <- apply(Raining_Joined, 2, median, na.rm=TRUE)
+
+median_values <- data.frame(Solar=Solar_med,Rain=Rain_med,Temp = Temp_med, Raining = Raining_med)
+
+median_values <- rownames_to_column(median_values, var = "Location")
+
+```
+
+**Hypothesis Testing**
+
+Plots QQ diagrams for all stations using solar variable.
+
+Runs Krusal Wallis test
+
+```{r}
+
+Solar_Joined_Long <- Solar_Joined %>%   
+  pivot_longer( cols = everything(), names_to = "Stations", values_to = "Solar")  
+
+Anova_Solar <- aov(Solar~Stations, data = Solar_Joined_Long) 
+summary(Anova_Solar) 
+TukeyHSD(Anova_Solar)  
+
+ggplot(Anova_Solar, aes(sample = Solar, group = Stations)) +   
+  stat_qq(distribution = stats::qnorm) +   
+  stat_qq_line(distribution = stats::qnorm, color = "red") +   
+  theme_bw() +    labs(x = "Theoretical", y = "Sample") +   
+  facet_wrap(~ Stations, ncol = 3, scales='free') +   
+  ggtitle("Normal QQ Plot For all Stations") +    
+  labs(x = "Theoretical", y = "Sample")  
+
+Anova_Solar_Sum <-Solar_Joined_Long  %>%   
+  group_by(Stations) %>%   
+  summarise(n = n(),             
+            mean = mean(Solar,na.rm=TRUE),
+            sd = sd(Solar,na.rm=TRUE))  
+
+r <- max(Anova_Solar_Sum$sd)/min(Anova_Solar_Sum$sd)  
+kruskal.test(Solar~Stations,data = Solar_Joined_Long)  
+```
+
+**Box Plots**
+
+This code block displays the boxplots for all 4 variables.
+
+```{r}
+Solar_Plotting <- Solar_Joined %>%
+  pivot_longer( cols = everything(), names_to = "Stations", values_to = "Solar Exposure Data")
+
+Rain_Plotting <- Rain_Joined %>%
+  pivot_longer( cols = everything(), names_to = "Stations", values_to = "Daily Rainfall amount")
+
+Raining_Plotting <- Raining_Joined %>%
+  pivot_longer( cols = everything(), names_to = "Stations", values_to = "Days of Rain")
+
+Temp_Plotting <- Temp_Joined %>%
+  pivot_longer( cols = everything(), names_to = "Stations", values_to = "Max Daily Temperature")
+
+
+ggplot(Raining_Plotting, aes(x = reorder(Stations, `Days of Rain`, FUN = median, na.rm = TRUE), y = `Days of Rain` , fill= Stations)) +
+  geom_boxplot() +
+  labs(
+    title = "Days of Rain per Year Comparison",
+    y = "No.Rainy Days",
+  ) + 
+  theme_bw() + 
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+  
+
+ggplot(Rain_Plotting, aes(x = reorder(Stations, `Daily Rainfall amount`, FUN = median, na.rm = TRUE),y = `Daily Rainfall amount` , fill= Stations)) +
+  geom_boxplot() +
+  labs(
+    title = "Yearly Rainfall amount comparison",
+    y = "Rainfall [ml]",
+  ) + 
+  theme_bw() +
+  theme(
+     axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+ggplot(Solar_Plotting, aes(x = reorder(Stations, `Solar Exposure Data`, FUN = median, na.rm = TRUE),y = `Solar Exposure Data` , fill= Stations)) +
+  geom_boxplot() +
+  labs(
+    title = "Station Solar Exposure Comparison",
+    y = "Solar Exposure [MJ/m²]",
+  ) + 
+  theme_bw() +
+  theme(
+     axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+ggplot(Temp_Plotting, aes(x = reorder(Stations, `Max Daily Temperature`, FUN = median, na.rm = TRUE), y = `Max Daily Temperature` , fill= Stations)) +
+  geom_boxplot() +
+  labs(
+    title = "Max Daily Temperature",
+    y = "Temperature [degrees celcius]",
+  ) + 
+  theme_bw()+
+  theme(
+     axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+```
+
+**Scatter-plots**
+
+This code displays the scatterplots for all variable combinations
+
+```{r}
+
+ggplot(median_values, aes(Rain, Solar, label = Location, colour = Location)) +
+  geom_point(size = 2) +
+  geom_text_repel(size = 4.5) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  xlab("Rainfall Median [ml]") +
+   geom_smooth(method = "lm", color = "grey", se = FALSE) + 
+  ylab("Solar Median [MJ/m2]") +
+  ggtitle("Correlation between Rainfall and Solar Exposure for all Stations")
+
+ggplot(median_values, aes(x = Rain, y = Temp, label = Location,colour=Location)) +
+  geom_point(size = 2) +
+  geom_text_repel(size = 4.5) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  xlab("Rainfall Median [ml]") +
+   geom_smooth(method = "lm", color = "grey", se = FALSE) + 
+  ylab("Temperature Median [degrees celsius]") +
+  ggtitle("Correlation between Temperature and Rainfall for all Stations")
+
+ggplot(median_values, aes(x = Temp, y = Solar, label = Location,colour=Location)) +
+  geom_point(size = 2) +
+  geom_text_repel(size = 4.5) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  geom_smooth(method = "lm", color = "grey", se = FALSE) + 
+  xlab("Temperature Median [degrees celsius]") +
+  ylab("Solar Median [MJ/m2]") + 
+  ggtitle("Correlation between Temperature and Solar Exposure for all Stations")
+```
