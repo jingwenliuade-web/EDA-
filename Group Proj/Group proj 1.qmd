@@ -16,7 +16,7 @@ library(ggrepel)
 
 ```{r}
 
-weather_station_folder <- "C:/Users/jingw/OneDrive/Desktop/EDA/Group Proj/Proj data/Weather Stations"
+weather_station_folder <-  "Proj data/Weather Stations"
 
 station_list <- list.dirs(weather_station_folder, recursive = FALSE, full.names = TRUE)
 
